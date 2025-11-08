@@ -1,12 +1,12 @@
-const btn = document.getElementById("send");
-const input = document.getElementById("input");
-const responseBox = document.getElementById("response");
+const sendBtn = document.getElementById("send");
+const inputBox = document.getElementById("input");
+const outputBox = document.getElementById("response");
 
-btn.addEventListener("click", async () => {
-  const text = input.value.trim();
-  if (!text) return alert("Please type something!");
+sendBtn.addEventListener("click", async () => {
+  const text = inputBox.value.trim();
+  if (!text) return alert("Please type something first!");
 
-  responseBox.textContent = "Thinking... 🤔";
+  outputBox.textContent = "Thinking... 🧠";
 
   try {
     const res = await fetch("/api", {
@@ -15,8 +15,8 @@ btn.addEventListener("click", async () => {
       body: JSON.stringify({ text }),
     });
     const data = await res.json();
-    responseBox.textContent = data.reply || "No response.";
+    outputBox.textContent = data.reply || "No response from AI.";
   } catch (err) {
-    responseBox.textContent = "Error: " + err.message;
+    outputBox.textContent = "Error: " + err.message;
   }
 });
