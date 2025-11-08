@@ -1,0 +1,28 @@
+body {
+  font-family: system-ui, sans-serif;
+  text-align: center;
+  background: #f5f6fa;
+  color: #2f3640;
+  margin-top: 100px;
+}
+textarea {
+  width: 80%;
+  height: 100px;
+  margin-top: 20px;
+}
+button {
+  background: #273c75;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+}
+pre {
+  background: #dcdde1;
+  width: 80%;
+  margin: 20px auto;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: left;
+}
