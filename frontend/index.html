@@ -4,25 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Akin Express AI 💬</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="chat-container">
-      <header>
-        <h1>🧠 Akin Express AI</h1>
-        <div id="userDisplay">Not signed in</div>
-        <button id="authBtn">Login with Google</button>
-      </header>
+    <div class="container">
+      <h1>🧠 Akin Express AI</h1>
+      <p class="subtitle">Liberian Global Student Chat + AI Bot</p>
 
-      <div id="messages" class="messages"></div>
+      <div id="loginSection" class="card">
+        <button id="googleLoginBtn">Sign in with Google</button>
+      </div>
 
-      <footer>
-        <input id="inputBox" type="text" placeholder="Type your message..." />
-        <button id="sendBtn">Send</button>
-      </footer>
+      <div id="chatSection" class="hidden">
+        <h2>Welcome, <span id="username"></span></h2>
+
+        <div id="messages"></div>
+
+        <div class="inputBox">
+          <input type="text" id="messageInput" placeholder="Type a message..." />
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
     </div>
 
-    <script type="module" src="./firebase.js"></script>
-    <script type="module" src="./chatroom.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
