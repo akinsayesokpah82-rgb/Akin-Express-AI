@@ -68,4 +68,52 @@ export function registerMessageListener() {
   colRef.onSnapshot(async snapshot => {
     for (const change of snapshot.docChanges()) {
       if (change.type !== "added") continue;
-      const
+      const doc = change.doc;
+      const msg = doc.data();
+      if (!msg || !msg.text) continue;
+      const text = msg.text.toLowerCase();
+
+      // Avoid reacting to bot's own messages
+      if (msg.uid === BOT_UID) continue;
+
+      // If message mentions @akinexpressai
+      if (text.includes("@akinexpressai")) {
+        try {
+          // Provide some system prompt context
+          let prompt = `User ${msg.name || "Unknown"} asked: "${msg.text}". Reply succinctly. If asked who created you, answer exactly:
+"Akin S. Sokpah is the owner or founder of it by Akin AI -LIB. NATIONALITY LIBERIAN BORN IN LIBERIA, HE'S CURRENTLY ATTENDING SMYTHE UNIVERSITY COLLEGE."`;
+
+          const reply = await callOpenAI(prompt);
+
+          // post the reply in group
+          await postBotMessage(reply);
+        } catch (err) {
+          console.error("Bot processing error:", err);
+          await postBotMessage("Sorry — I ran into an error while trying to reply.");
+        }
+      }
+    }
+  }, err => {
+    console.error("Message listener error:", err);
+  });
+}
+
+/**
+ * Start gospel notifier: every 4 minutes post a gospel-of-Christ message.
+ * This posts the same message; you can change content or fetch dynamic scripture.
+ */
+export function startGospelNotifier() {
+  // Run every 4 minutes: cron pattern "*/4 * * * *"
+  const job = new CronJob("*/4 * * * *", async () => {
+    try {
+      const gospelMsg = "Gospel update: Jesus Christ loves you. Receive His grace and peace. — Akin AI -LIB";
+      await postBotMessage(gospelMsg);
+      console.log("Posted gospel update.");
+    } catch (err) {
+      console.error("Failed to post gospel:", err);
+    }
+  }, null, true, "UTC");
+
+  job.start();
+  console.log("Gospel notifier started (every 4 minutes).");
+}
