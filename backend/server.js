@@ -1,48 +1,29 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import dotenv from "dotenv";
-import bodyParser from "body-parser";
-import admin from "./firebaseAdmin.js";
-
 dotenv.config();
 
+// Standard setup
 const app = express();
-app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
+app.use(cors());
 
-const PORT = process.env.PORT || 5000;
+// ✅ Fix for serving frontend
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "public")));
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("🧠 Akin Express AI backend is running successfully!");
+// Your routes below
+app.get("/api", (req, res) => {
+  res.json({ message: "Akin Express AI API running!" });
 });
 
-// POST route for chat
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
-
-    // Very basic AI reply (you can upgrade to GPT/OpenAI API)
-    let reply = "";
-
-    if (message.toLowerCase().includes("hello")) {
-      reply = "Hi there 👋! I'm Akin Express AI. How can I help you today?";
-    } else if (message.toLowerCase().includes("how are you")) {
-      reply = "I'm doing great! Thanks for asking 😄";
-    } else if (message.toLowerCase().includes("who created you")) {
-      reply = "I was created by Akin Saye Sokpah ❤️ using Firebase and Express!";
-    } else {
-      reply = "Interesting 🤔... I'm learning from your messages.";
-    }
-
-    res.json({ reply });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error: " + err.message });
-  }
+// ✅ Serve frontend
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🧠 Akin Express AI running on port ${PORT}`));
