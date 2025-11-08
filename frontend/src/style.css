@@ -1,0 +1,15 @@
+body { font-family: Inter, system-ui, sans-serif; margin:0; padding:0; background:#f6f8fb; color:#111; }
+.app-container { max-width:900px; margin:1rem auto; background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.05); overflow:hidden; }
+.app-header { padding:1rem 1.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.tagline { color:#666; margin:0; }
+.btn { padding:8px 12px; border-radius:8px; border:0; background:#2b6cb0; color:white; cursor:pointer; }
+.user-info { display:flex; align-items:center; gap:8px; }
+.avatar, .msg-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; }
+.chat-wrap { padding:1rem; display:flex; flex-direction:column; height:70vh; }
+.messages { flex:1; overflow:auto; padding-right:8px; }
+.message { border-radius:8px; padding:10px; margin-bottom:10px; background:#f1f5f9; }
+.message.mine { background:#dbeafe; align-self:flex-end; }
+.meta { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.composer { display:flex; gap:8px; margin-top:8px; }
+.composer input { flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; }
+.footer { padding:8px 1.5rem; text-align:center; color:#777; font-size:14px; border-top:1px solid #eee; }
