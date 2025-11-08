@@ -1,90 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Akin Express AI</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- Firebase -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-      import {
-        getAuth,
-        GoogleAuthProvider,
-        signInWithPopup,
-        signOut,
-        onAuthStateChanged
-      } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akin Express AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>🤖 Akin Express AI</h1>
 
-      // ✅ Your Firebase config
-      const firebaseConfig = {
-        apiKey: "AIzaSyC7cAN-mrE2PvmlQ11zLKAdHBhN7nUFjHw",
-        authDomain: "fir-u-c-students-web.firebaseapp.com",
-        databaseURL: "https://fir-u-c-students-web-default-rtdb.firebaseio.com",
-        projectId: "fir-u-c-students-web",
-        storageBucket: "fir-u-c-students-web.firebasestorage.app",
-        messagingSenderId: "113569186739",
-        appId: "1:113569186739:web:d8daf21059f43a79e841c6",
-      };
+  <div id="auth-section">
+    <button id="login">Sign in with Google</button>
+    <div id="user"></div>
+  </div>
 
-      // ✅ Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
+  <div id="ai-section" style="display: none;">
+    <textarea id="input" placeholder="Type your question..."></textarea>
+    <button id="send">Ask AI</button>
+    <pre id="response"></pre>
+    <div id="history"></div>
+  </div>
 
-      const loginBtn = document.getElementById("login");
-      const logoutBtn = document.getElementById("logout");
-      const userBox = document.getElementById("user");
-      const aiBox = document.getElementById("ai-section");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-      // Google Login
-      loginBtn.addEventListener("click", async () => {
-        try {
-          await signInWithPopup(auth, provider);
-        } catch (error) {
-          alert("Login failed: " + error.message);
+    const firebaseConfig = {
+      apiKey: "AIzaSyC7cAN-mrE2PvmlQ11zLKAdHBhN7nUFjHw",
+      authDomain: "fir-u-c-students-web.firebaseapp.com",
+      databaseURL: "https://fir-u-c-students-web-default-rtdb.firebaseio.com",
+      projectId: "fir-u-c-students-web",
+      storageBucket: "fir-u-c-students-web.firebasestorage.app",
+      messagingSenderId: "113569186739",
+      appId: "1:113569186739:web:d8daf21059f43a79e841c6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getDatabase(app);
+
+    const loginBtn = document.getElementById("login");
+    const userBox = document.getElementById("user");
+    const aiBox = document.getElementById("ai-section");
+    const sendBtn = document.getElementById("send");
+    const inputBox = document.getElementById("input");
+    const outputBox = document.getElementById("response");
+    const historyBox = document.getElementById("history");
+
+    loginBtn.addEventListener("click", async () => {
+      await signInWithPopup(auth, provider);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userBox.innerHTML = `<img src="${user.photoURL}" class="avatar"/><h3>${user.displayName}</h3><button id="logout">Logout</button>`;
+        document.getElementById("login").style.display = "none";
+        aiBox.style.display = "block";
+        loadHistory(user.uid);
+
+        document.getElementById("logout").onclick = () => signOut(auth);
+      } else {
+        userBox.innerHTML = "";
+        aiBox.style.display = "none";
+        document.getElementById("login").style.display = "inline-block";
+      }
+    });
+
+    sendBtn.onclick = async () => {
+      const text = inputBox.value.trim();
+      const user = auth.currentUser;
+      if (!text) return alert("Type something!");
+      if (!user) return alert("Login first!");
+
+      outputBox.textContent = "Thinking...";
+
+      const res = await fetch("/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, userId: user.uid }),
+      });
+
+      const data = await res.json();
+      outputBox.textContent = data.reply;
+
+      // Save to Firebase for history
+      push(ref(db, `users/${user.uid}/chats`), {
+        question: text,
+        answer: data.reply,
+        timestamp: Date.now(),
+      });
+    };
+
+    function loadHistory(uid) {
+      const chatRef = ref(db, `users/${uid}/chats`);
+      onValue(chatRef, (snapshot) => {
+        const chats = snapshot.val();
+        historyBox.innerHTML = "<h3>🕓 Your Chat History</h3>";
+        for (let key in chats) {
+          const c = chats[key];
+          historyBox.innerHTML += `<div class='chat'><b>You:</b> ${c.question}<br/><b>AI:</b> ${c.answer}</div>`;
         }
       });
-
-      // Logout
-      logoutBtn.addEventListener("click", async () => {
-        await signOut(auth);
-      });
-
-      // Watch login state
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          userBox.innerHTML = `
-            <img src="${user.photoURL}" alt="User" class="avatar" />
-            <h3>${user.displayName}</h3>
-            <button id="logout">Logout</button>
-          `;
-          aiBox.style.display = "block";
-          document.getElementById("login").style.display = "none";
-        } else {
-          userBox.innerHTML = "";
-          aiBox.style.display = "none";
-          document.getElementById("login").style.display = "inline-block";
-        }
-      });
-    </script>
-  </head>
-
-  <body>
-    <h1>🤖 Akin Express AI</h1>
-
-    <div id="auth-section">
-      <button id="login">Sign in with Google</button>
-      <div id="user"></div>
-    </div>
-
-    <div id="ai-section" style="display: none;">
-      <p>Ask me anything powered by Akin Express AI</p>
-      <textarea id="input" placeholder="Type your question..."></textarea>
-      <button id="send">Ask AI</button>
-      <pre id="response"></pre>
-    </div>
-
-    <script src="script.js"></script>
-  </body>
+    }
+  </script>
+</body>
 </html>
